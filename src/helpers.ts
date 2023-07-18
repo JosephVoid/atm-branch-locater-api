@@ -1,4 +1,3 @@
-import geolib from "geolib"
 import fs from "fs"
 import { RowDataPacket } from "mysql2";
 

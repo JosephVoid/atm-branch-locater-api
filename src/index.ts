@@ -51,7 +51,7 @@ app.use((req, res, next) => {
   var username = auth[0]; var pass = auth[1];
 
   connection.query<IUser[]>('SELECT `PASSWORD` FROM users WHERE `USERNAME` = ?', [username], function (error, results, fields) {
-    if (error) res.status(500).send(error)
+    if (error) res.status(500).send("error")
     bcrypt.compare(pass, results[0].PASSWORD, function(err, result) {
       if (result) next()
       else return res.status(401).json("WRONG CREDS")
@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 
 app.get("/allATM", (req,res, next) => {
   connection.query('SELECT * FROM atmlocation', function (error, results, fields) {
-    if (error) res.status(500).send(error)
+    if (error) res.status(500).send("error")
     console.log(results)
     res.send(results)
   })
@@ -81,32 +81,32 @@ app.get("/getPic", (req,res, next) => {
 
 app.get("/allBranch", (req,res, next) => {
   connection.query('SELECT * FROM branchlocation', function (error, results, fields) {
-    if (error) res.status(500).send(error)
+    if (error) res.status(500).send("error")
     res.send(results)
   })
 })
-///closeATM/:number?lat=<>&long=<>
-app.get("/closeATM/:number", (req,res, next) => {
+///closeATM?number=<>&lat=<>&long=<>
+app.get("/closeATM", (req,res, next) => {
   var lat = req.query.lat
   var long = req.query.long
-  var num = req.params.number
+  var num = req.query.number
   
   if (!isNumeric(lat) || !isNumeric(long) || !isNumeric(num)) return res.status(403).json("Bad Input")
   connection.query('SELECT * FROM atmlocation', function (error, results, fields) {
-    if (error) res.status(500).send(error)
+    if (error) res.status(500).send("error")
     var ATM_DISTANCED = getDist(lat as string, long as string, results as any[]).sort((a, b) => a.dist - b.dist).slice(0,Number(num))
     res.send(ATM_DISTANCED)
   })
 })
-///closeBranch/:number?lat=<>&long=<>
-app.get("/closeBranch/:number", (req,res, next) => {
+///closeBranch?number=<>&lat=<>&long=<>
+app.get("/closeBranch", (req,res, next) => {
   var lat = req.query.lat
   var long = req.query.long
-  var num = req.params.number
+  var num = req.query.number
   
   if (!isNumeric(lat) || !isNumeric(long) || !isNumeric(num)) return res.status(403).json("Bad Input")
   connection.query('SELECT * FROM branchlocation', function (error, results, fields) {
-    if (error) res.status(500).send(error)
+    if (error) res.status(500).send("error")
     var BRANCH_DISTANCED = getDist(lat as string, long as string, results as any[]).sort((a, b) => a.dist - b.dist).slice(0,Number(num))
     res.send(BRANCH_DISTANCED)
   })
@@ -172,7 +172,6 @@ app.post("/CRUD/:type/:entity", (req, res, next) => {
     default:
       break;
   }
-  res.send("Hey")
 })
 
 // /upload?tid=<ATM>&enitity=<"ATM" | "BRANCH">
@@ -194,7 +193,7 @@ app.post("/upload", (req, res, next) => {
   // Use the mv() method to place the file somewhere on your server
   inputF.mv(uploadPath, function(err:any) {
     if (err)
-      return res.status(500).send(err);
+      return res.status(500).send("error");
     
     // Add pic to ATM db
     if (entity == "ATM") {
