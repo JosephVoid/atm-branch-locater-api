@@ -20,7 +20,9 @@
     "start:prod": "node index.js",
     "stop": "pm2 stop index",
     "start": "set NODE_ENV=uat&& nodemon index.js",
+    "dev-lint": "nodemon --exec \"npm run lint\"",
     "start-ts": "tsc && node ./build/index.js",
+    "lint": "eslint \"**/*.ts\" --fix",
     "start:nodemon": "nodemon"
   },
   "devDependencies": {
