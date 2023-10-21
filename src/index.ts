@@ -42,28 +42,33 @@ app.use((req, res, next) => {
   const authheader = req.headers.authorization;
   if (!authheader)
     return res.status(401).json({ message: "Authentication Needed" });
-
-  const auth: any = Buffer.from(authheader.split(" ")[1], "base64")
+  try {
+    const auth: any = Buffer.from(authheader, "base64")
     .toString()
     .split(":");
-  const username = auth[0];
-  const pass = auth[1];
+    const username = auth[0];
+    const pass = auth[1];
 
-  connection.query<IUser[]>(
-    "SELECT `PASSWORD` FROM users WHERE `USERNAME` = ?",
-    [username],
-    function (error, results, fields) {
-      if (error) res.status(500).send("error");
-      try {
-        bcrypt.compare(pass, results[0].PASSWORD, function (err, result) {
-          if (result) next();
-          else return res.status(401).json("WRONG CREDS");
-        });
-      } catch (error) {
-        return res.send("Please provide proper authorization");
+    connection.query<IUser[]>(
+      "SELECT `PASSWORD` FROM users WHERE `USERNAME` = ?",
+      [username],
+      function (error, results, fields) {
+        if (error) res.status(500).json("error");
+        try {
+          bcrypt.compare(pass, results[0].PASSWORD, function (err, result) {
+            if (result) next();
+            else return res.status(401).json("WRONG CREDS");
+          });
+        } catch (error) {
+          return res.status(403).json({err: "Please provide proper authorization"});
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json({err: "Please provide proper authorization"});
+  }
+
 });
 
 app.get("/allATM", (req, res, next) => {
