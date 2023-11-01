@@ -39,9 +39,11 @@ interface IUser extends RowDataPacket {
 
 // Authorize header
 app.use((req, res, next) => {
-  const authheader = req.headers.authorization;
+  let authheader = req.headers.authorization;
   if (!authheader)
     return res.status(401).json({ message: "Authentication Needed" });
+  if (authheader.includes('Basic '))
+    authheader = authheader.split(" ")[1];
   try {
     const auth: any = Buffer.from(authheader, "base64")
     .toString()
